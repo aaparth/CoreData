@@ -20,8 +20,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.register(UITableViewCell.self,
-                           forCellReuseIdentifier: "Cell")
+        tableView.register(UINib(nibName: "TVCell", bundle: nil), forCellReuseIdentifier: "TVCell")
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -87,9 +86,13 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         let managedContext = appDelegate.persistentContainer.viewContext
         
         let entity = NSEntityDescription.entity(forEntityName: "Person", in: managedContext)!
-        
         let person = NSManagedObject(entity: entity, insertInto: managedContext)
         
+        let image = UIImage(named: "img.png")
+        let data = UIImagePNGRepresentation(image!)
+        
+        person.setValue(self.people.count + 1, forKey: "id")
+        person.setValue(data, forKey: "image")
         person.setValue(name, forKeyPath: "name")
         
         do {
@@ -108,14 +111,22 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell =
-            tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+            tableView.dequeueReusableCell(withIdentifier: "TVCell", for: indexPath) as! TVCell
         
         let person = people[indexPath.row]
         
         if person.value(forKeyPath: "name") is String{
-            cell.textLabel?.text = person.value(forKey: "name") as? String
+            cell.lblName.text = person.value(forKey: "name") as? String
+        }
+        
+        if let img = person.value(forKey: "image") as? NSData{
+            cell.imgUser.image = UIImage(data: img as Data)
         }
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 50
     }
 
 }
